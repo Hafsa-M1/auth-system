@@ -8,19 +8,13 @@ export class AuthController {
 
   // 🔹 REGISTER
   @Post('register')
-  register(
-    @Body('email') email: string,
-    @Body('password') password: string,
-  ) {
+  register(@Body('email') email: string, @Body('password') password: string) {
     return this.authService.register(email, password);
   }
 
   // 🔹 LOGIN
   @Post('login')
-  login(
-    @Body('email') email: string,
-    @Body('password') password: string,
-  ) {
+  login(@Body('email') email: string, @Body('password') password: string) {
     return this.authService.login(email, password);
   }
 
@@ -41,7 +35,7 @@ export class AuthController {
   }
 
   @Post('forgot-password')
-forgotPassword(@Body('email') email: string) {
-  return this.authService.forgotPassword(email);
-}
+  forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
 }

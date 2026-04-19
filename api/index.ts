@@ -3,25 +3,24 @@ import { AppModule } from '../src/app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 
-const server = express();
+let cachedServer: any;
 
-let cachedApp: any;
-
-async function createNestApp() {
-  if (!cachedApp) {
+export default async function handler(req: any, res: any) {
+  if (!cachedServer) {
+    const expressApp = express();
     const app = await NestFactory.create(
       AppModule,
-      new ExpressAdapter(server),
+      new ExpressAdapter(expressApp),
     );
-
+    
+    // Copy ALL your global configurations from main.ts here
+    app.enableCors();
+    // app.useGlobalPipes(...);
+    // app.useGlobalInterceptors(...);
+    // app.useGlobalFilters(...);
+    
     await app.init();
-    cachedApp = server;
+    cachedServer = expressApp;
   }
-
-  return cachedApp;
-}
-
-export default async function handler(req, res) {
-  const app = await createNestApp();
-  return app(req, res);
+  cachedServer(req, res);
 }

@@ -90,46 +90,46 @@ export class AuthService {
     };
   }
   async logout(refreshToken: string) {
-  const session = await this.prisma.session.findFirst({
-    where: { refreshToken },
-  });
+    const session = await this.prisma.session.findFirst({
+      where: { refreshToken },
+    });
 
-  if (!session) {
-    return { message: 'Session not found' };
+    if (!session) {
+      return { message: 'Session not found' };
+    }
+
+    await this.prisma.session.delete({
+      where: { id: session.id },
+    });
+
+    return { message: 'Logged out successfully' };
   }
 
-  await this.prisma.session.delete({
-    where: { id: session.id },
-  });
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
 
-  return { message: 'Logged out successfully' };
-}
+    if (!user) {
+      return { message: 'User not found' };
+    }
 
-async forgotPassword(email: string) {
-  const user = await this.prisma.user.findUnique({
-    where: { email },
-  });
+    const token = Math.random().toString(36).substring(2);
 
-  if (!user) {
-    return { message: 'User not found' };
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+
+    await this.prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        token,
+        expiresAt,
+      },
+    });
+
+    return {
+      message: 'Password reset token generated',
+      resetToken: token, // (for testing only)
+    };
   }
-
-  const token = Math.random().toString(36).substring(2);
-
-  const expiresAt = new Date();
-  expiresAt.setHours(expiresAt.getHours() + 1);
-
-  await this.prisma.passwordResetToken.create({
-    data: {
-      userId: user.id,
-      token,
-      expiresAt,
-    },
-  });
-
-  return {
-    message: 'Password reset token generated',
-    resetToken: token, // (for testing only)
-  };
-}
 }
